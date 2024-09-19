@@ -8,19 +8,23 @@ $DCodeJSON = json_decode(json: $JSONDATA, associative: true);
 if (isset($DCodeJSON["day"]) && isset($DCodeJSON["start_time"]) && isset($DCodeJSON["therapists_id"])) {
     $days = $DCodeJSON["day"];
     $start_time = $DCodeJSON["start_time"];
-    $therapists_id = $DCodeJSON["therapists_id"];
+    $therapists_id = intval($DCodeJSON["therapists_id"]);
     $formattedStartTime = date_format(date_create($start_time), "H:i:s");
 
-    $results = mysqli_query($var_conn, "SELECT * FROM `tbl_sched`;");
+    
+    $var_SchedChk = "SELECT * FROM `tbl_sched`
+     WHERE `therapists_id` = $therapists_id AND `start_time` = '$formattedStartTime';";
+
+    $results = mysqli_query($var_conn,  $var_SchedChk);
     $isMatched = 0;
 
     if ($results) {
         foreach ($results as $result) {
-            $databaseDays = $result["day"];
+            $databaseDays = explode(",",$result["day"]);
             $databaseStartTime = $result["start_time"];
             $databaseTherapistId = $result["therapists_id"];
-
-            if ($databaseDays == implode(",", $days) && $databaseStartTime == $formattedStartTime && $therapists_id == $databaseTherapistId) {
+            $var_chekDays = array_intersect($databaseDays,$days);
+            if ($var_chekDays !="" && $databaseStartTime == $formattedStartTime) {
                 $isMatched = 1;
                 break;
             }
