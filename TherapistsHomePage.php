@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="TherapistsDesign/TherapistsHomePage.css">
 </head>
 <?php
+include("databse.php");
 session_start();
-
 
 echo $_SESSION["sess_id"];
 
@@ -24,30 +24,38 @@ $var_Radius = "";
 $var_Error = "";
 $var_Invalidnote = false;
 $var_Status = "";
+$var_Chk = false;
 
 $var_id = $_SESSION["sess_id"];
 $var_Tid = "";
+$var_GetSched = "SELECT U.User_id,
+                             U.Fname,
+                             U.Lname,
+                             U.Mname,
+                             U.profilePic,
+                             T.case_handled,
+                             T.city,
+                             T.Radius,
+                             T.therapist_id 
+                        FROM tbl_therapists T 
+                        JOIN tbl_user U ON T.user_id = U.User_id 
+                        WHERE T.user_id =" . $var_id;
+$var_qry = mysqli_query($var_conn, $var_GetSched);
+if (mysqli_num_rows($var_qry) > 0) {
 
-if ($var_qry) {
+    $var_Chk = "true";
     $var_rec = mysqli_fetch_array($var_qry);
+    $var_ProfPic =  $var_rec["profilePic"];
     $var_Fname = $var_rec["Fname"];
-    $var_Lname = $var_rec["Lname"];
-    $var_Mname = $var_rec["Mname"];
-    $var_CaseHndld = $var_rec["case_handled"];
-    $var_City = $var_rec["city"];
-    $var_Radius = $var_rec["Radius"];
-    $var_ProfPic = $var_rec["profilePic"];
+    $var_Lname =  $var_rec["Lname"];
+    $var_Mname =  $var_rec["Mname"];
+    $var_CaseHndld =  $var_rec["case_handled"];
+    $var_City =  $var_rec["city"];
+    $var_Radius =  $var_rec["Radius"];
     $var_Tid = $var_rec["therapist_id"];
     $_SESSION["sess_Tid"] = $var_Tid;
-} else {
-    echo "Error";
 }
-
-echo  $_SESSION["sess_Tid"];
-function ChkNum($value)
-{
-    return is_numeric($value);
-}
+echo $_SESSION["sess_Tid"];
 ?>
 
 <body>
@@ -69,11 +77,10 @@ function ChkNum($value)
                 <li class="nav-item"><a class="nav-link">Reminder</a></li>
                 <li class="nav-item"><a class="nav-link">Notification</a></li>
                 <li class="nav-item"><a class="nav-link">Chat</a></li>
-                <a href="ProfilePage.php" class="nav-link">Profile</a>
+                <a href="TherapistsProfilePage.php" class="nav-link">Profile</a>
                 <ul class="logout">
                     <li><a href="logout.php">Logout</a></li>
                 </ul>
-                </li>
             </ul>
         </div>
     </nav>
@@ -83,90 +90,33 @@ function ChkNum($value)
                 <div class="box">
                     <div class="Details-box  rounded">
                         <div class="TherapistInfo rounded">
-                            <img class="border rounded-circle" src="ProfilePic/<?php echo $var_ProfPic; ?>" alt="Profile Picture">
-                            <?php
+                            <img id="ProfPic" class="border rounded-circle" src="" alt="Profile Picture">
+                            <p id="fllname"></p>
+                            <p id="case_handled"></p>
+                            <p id="City"></p>
+                            <p id="Radius"></p>
 
-                            echo "<p>Name: " . $var_Lname . " " . $var_Fname . " " . $var_Mname . "</p>";
-                            echo "<p>Area Covered: " . $var_City . " City Within " . $var_Radius . " Km</p>";
-                            echo "<p>Specialized in: " . $var_CaseHndld . "</p>";
-                            ?>
+
                             <p>Rating: </p>
                         </div>
                         <div class="TherapistScghed">
-                            <?php
-                            $var_schdSelect = "SELECT `shed_id`, `therapists_id`, `day`,
-                               `start_time`, `end_time`, `note`,
-                               `status`, `date_created`
-                                FROM `tbl_sched`
-                                WHERE `therapists_id` = " . intval($var_Tid) . " 
-                                ORDER BY `start_time` ASC";
-                            $var_schdqry = mysqli_query($var_conn, $var_schdSelect);
-                            ?>
-                            <h3 class="text-center">Available Schedule</h3>
-                            <div class="TimeBtn">
-                                <input type="button" name="BtnAM" value="AM" id="BtnAM">
-                                <input type="button" name="BtnPM" value="PM" id="BtnPM">
+                            <div id="TimeBTN" class="TimeBTN">
+                                <button id="BtnAM">AM</button>
+                                <button id="BtnPM">PM</button>
                             </div>
-                            <?php
-                            $var_PSched = "SELECT `shed_id`, `therapists_id`, `day`,
-                                        `start_time`, `end_time`, `note`,
-                                        `status`, `date_created`
-                                        FROM `tbl_sched`
-                                        WHERE `therapists_id` = $var_Tid
-                                        ORDER BY `start_time` ASC";
-                            $var_Schdqry = mysqli_query($var_conn, $var_PSched);
-
-                            ?>
                             <div class="AM" id="AM-schedule">
                                 <div class="SchedButton">
-                                    <?php
-                                    if (mysqli_num_rows($var_Schdqry) > 0) {
-                                        while ($var_schdrec = mysqli_fetch_array($var_Schdqry)) {
-                                            if (date('G', strtotime($var_schdrec["end_time"])) < 12) {
-                                                echo '<button value="' . $var_schdrec["shed_id"] . '">'
-                                                    . $var_schdrec["day"] . '<br>' .
-                                                    date('g A', strtotime($var_schdrec["start_time"])) . ' / ' .
-                                                    date('g A', strtotime($var_schdrec["end_time"])) . '<br>' .
-                                                    $var_schdrec["note"] . '
-                                                </button>';
-                                            }
-                                        }
-                                    } else {
-                                        echo "<p>No Schedule Available</p>";
-                                    }
-                                    ?>
+                                    <p id="AM"></p>
                                 </div>
                             </div>
                             <div class="PM" id="PM-schedule" style="display: none;">
                                 <div class="SchedButton">
-                                    <?php
-                                    // Reset the result pointer to fetch data again if necessary
-                                    mysqli_data_seek($var_Schdqry, 0);
-
-                                    if (mysqli_num_rows($var_Schdqry) > 0) {
-                                        while ($var_schdrec = mysqli_fetch_array($var_Schdqry)) {
-                                            // Check for PM times (12 PM or later)
-                                            if (date('G', strtotime($var_schdrec["end_time"])) >= 12) {
-                                                echo '<button type="button" 
-                                                    value="' . $var_schdrec["shed_id"] . '">'
-                                                    . $var_schdrec["day"] . '<br>' .
-                                                    date('g A', strtotime($var_schdrec["start_time"])) . ' / ' .
-                                                    date('g A', strtotime($var_schdrec["end_time"])) . '<br>' .
-                                                    $var_schdrec["note"] . '
-                                                    </button>';
-                                            }
-                                        }
-                                    } else {
-                                        echo "<p>No Schedule Available</p>";
-                                    }
-                                    ?>
+                                    <!-- PM Schedule content goes here -->
                                 </div>
                             </div>
                             <a style="width: 500px; height:200px;" href="TherapistsSched.php">
                                 ADD SCHEDULE
-                                </a>
-
-
+                            </a>
                         </div>
                     </div>
 
@@ -180,47 +130,113 @@ function ChkNum($value)
                             ?>
                         </select>
                     </div>
-
-
                 </div>
-
             </div>
-
         </div>
-
-
     </div>
-    
+
     <script src="js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnAM = document.getElementById('BtnAM');
+            const btnPM = document.getElementById('BtnPM');
+            const amSchedule = document.getElementById('AM-schedule');
+            const pmSchedule = document.getElementById('PM-schedule');
+            let TherapID;
+            if (btnAM && btnPM && amSchedule && pmSchedule) {
+                btnAM.addEventListener('click', function() {
+                    amSchedule.style.display = 'block';
+                    pmSchedule.style.display = 'none';
+                });
+
+                btnPM.addEventListener('click', function() {
+                    amSchedule.style.display = 'none';
+                    pmSchedule.style.display = 'block';
+                });
+            }
+
+            async function suway() {
+                try {
+                    const response = await fetch("./HomePageAPI/TheraPistsAPI.php", {
+                        method: "POST", // Ensure "POST" is in quotes
+                        body: JSON.stringify({
+                            'ID': "<?php echo $_SESSION["sess_id"]; ?>" // Ensure the PHP value is correctly outputted as a string
+                        })
+                    });
+                    const data = await response.json();
+                    const fullname = `${data.fname} ${data.mname.charAt(0)}. ${data.lname}`;
+                    document.getElementById("fllname").innerText = fullname;
+                    document.getElementById("ProfPic").src = `ProfilePic/${data.ProfPic}`;
+                    document.getElementById("case_handled").innerText = data.case;
+                    document.getElementById("City").innerText = data.city;
+                    document.getElementById("Radius").innerText = data.radius;
+                    TherapID=data.therapitst_id;
+
+                } catch (error) {
+                    console.error('Error:', error); // Log any errors
+                }
+            }
+            async function GetSched(TherapID) {
+    try {
+        const SchedRes = await fetch("./HomePageAPI/TherapistsSchedAPI.php", {
+            method: "POST",
+            body: JSON.stringify({
+                "TID": TherapID // Therapist ID sent in the request
+            }),
+            headers: {
+                'Content-Type': 'application/json' // Ensure correct content type
+            }
+        });
+
+        // Parse the response as JSON
+        const scheddata = await SchedRes.json();
+
+        // Target the <p id="AM"></p> element
+        const amElement = document.getElementById("AM");
+
+        // Clear the content of the element before appending new data
+        amElement.innerHTML = "";
+
+        // Check if the response contains a message or schedules
+        if (scheddata.message) {
+            amElement.innerHTML = scheddata.message; // Display the "No Record found" message
+        } else {
+            // Loop through each schedule and append its details to the HTML element
+            scheddata.forEach(schedule => {
+                const schedId = schedule.Sched_id;
+                const day = schedule.Day;
+                const startTime = schedule.Start_ime;  // Typo: Start_ime in the PHP data
+                const endTime = schedule.End_Time;
+                const note = schedule.Note;
+                const stat = schedule.Status;
+
+                // Create a string of HTML for each schedule
+                const scheduleHTML = `
+                    <p>Schedule ID: ${schedId}</p>
+                    <p>Day: ${day}</p>
+                    <p>Start Time: ${startTime}</p>
+                    <p>End Time: ${endTime}</p>
+                    <p>Note: ${note}</p>
+                    <p>Status: ${stat}</p>
+                    <hr>
+                `;
+
+                // Append the schedule information to the element
+                amElement.innerHTML += scheduleHTML;
+            });
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById("AM").innerHTML = "An error occurred while fetching schedules.";
+    }
+}
+    
+
+            suway(); // Call suway() when the page is fully loaded
+            GetSched(TherapID);
+        });
+    </script>
 </body>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const btnAM = document.getElementById('BtnAM'); // Ensure this exists
-        const btnPM = document.getElementById('BtnPM'); // Ensure this exists
-        const amSchedule = document.getElementById('AM-schedule'); // Ensure this exists
-        const pmSchedule = document.getElementById('PM-schedule'); // Ensure this exists
-
-        if (btnAM && btnPM && amSchedule && pmSchedule) {
-            btnAM.addEventListener('click', function() {
-                amSchedule.style.display = 'block';
-                pmSchedule.style.display = 'none';
-            });
-
-            btnPM.addEventListener('click', function() {
-                amSchedule.style.display = 'none';
-                pmSchedule.style.display = 'block';
-            });
-        }
-       
-    });
-        async function suway(){
-            const response  = await fetch("./HomePageAPI/TheraPistsSched,php",{
-                method: POST,
-                body: JSON.stringify({
-                    'ID' : <?php echo $_SESSION["sess_id"];?>  
-                })
-            })
-        }
-</script>
 </html>
