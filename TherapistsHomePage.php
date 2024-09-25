@@ -14,48 +14,6 @@ session_start();
 
 echo $_SESSION["sess_id"];
 
-$var_ProfPic = "";
-$var_Fname = "";
-$var_Lname = "";
-$var_Mname = "";
-$var_CaseHndld = "";
-$var_City = "";
-$var_Radius = "";
-$var_Error = "";
-$var_Invalidnote = false;
-$var_Status = "";
-$var_Chk = false;
-
-$var_id = $_SESSION["sess_id"];
-$var_Tid = "";
-$var_GetSched = "SELECT U.User_id,
-                             U.Fname,
-                             U.Lname,
-                             U.Mname,
-                             U.profilePic,
-                             T.case_handled,
-                             T.city,
-                             T.Radius,
-                             T.therapist_id 
-                        FROM tbl_therapists T 
-                        JOIN tbl_user U ON T.user_id = U.User_id 
-                        WHERE T.user_id =" . $var_id;
-$var_qry = mysqli_query($var_conn, $var_GetSched);
-if (mysqli_num_rows($var_qry) > 0) {
-
-    $var_Chk = "true";
-    $var_rec = mysqli_fetch_array($var_qry);
-    $var_ProfPic =  $var_rec["profilePic"];
-    $var_Fname = $var_rec["Fname"];
-    $var_Lname =  $var_rec["Lname"];
-    $var_Mname =  $var_rec["Mname"];
-    $var_CaseHndld =  $var_rec["case_handled"];
-    $var_City =  $var_rec["city"];
-    $var_Radius =  $var_rec["Radius"];
-    $var_Tid = $var_rec["therapist_id"];
-    $_SESSION["sess_Tid"] = $var_Tid;
-}
-echo $_SESSION["sess_Tid"];
 ?>
 
 <body>
@@ -95,7 +53,7 @@ echo $_SESSION["sess_Tid"];
                             <p id="case_handled"></p>
                             <p id="City"></p>
                             <p id="Radius"></p>
-
+                            <p id="ID"></p>
 
                             <p>Rating: </p>
                         </div>
@@ -137,106 +95,92 @@ echo $_SESSION["sess_Tid"];
 
     <script src="js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const btnAM = document.getElementById('BtnAM');
-            const btnPM = document.getElementById('BtnPM');
-            const amSchedule = document.getElementById('AM-schedule');
-            const pmSchedule = document.getElementById('PM-schedule');
-            let TherapID;
-            if (btnAM && btnPM && amSchedule && pmSchedule) {
-                btnAM.addEventListener('click', function() {
-                    amSchedule.style.display = 'block';
-                    pmSchedule.style.display = 'none';
-                });
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnAM = document.getElementById('BtnAM');
+        const btnPM = document.getElementById('BtnPM');
+        const amSchedule = document.getElementById('AM-schedule');
+        const pmSchedule = document.getElementById('PM-schedule');
+        let TherapID; // Declare global variable to hold the therapist's ID
 
-                btnPM.addEventListener('click', function() {
-                    amSchedule.style.display = 'none';
-                    pmSchedule.style.display = 'block';
-                });
-            }
+        if (btnAM && btnPM && amSchedule && pmSchedule) {
+            btnAM.addEventListener('click', function() {
+                amSchedule.style.display = 'block';
+                pmSchedule.style.display = 'none';
+            });
 
-            async function suway() {
-                try {
-                    const response = await fetch("./HomePageAPI/TheraPistsAPI.php", {
-                        method: "POST", // Ensure "POST" is in quotes
-                        body: JSON.stringify({
-                            'ID': "<?php echo $_SESSION["sess_id"]; ?>" // Ensure the PHP value is correctly outputted as a string
-                        })
-                    });
-                    const data = await response.json();
-                    const fullname = `${data.fname} ${data.mname.charAt(0)}. ${data.lname}`;
-                    document.getElementById("fllname").innerText = fullname;
-                    document.getElementById("ProfPic").src = `ProfilePic/${data.ProfPic}`;
-                    document.getElementById("case_handled").innerText = data.case;
-                    document.getElementById("City").innerText = data.city;
-                    document.getElementById("Radius").innerText = data.radius;
-                    TherapID=data.therapitst_id;
-
-                } catch (error) {
-                    console.error('Error:', error); // Log any errors
-                }
-            }
-            async function GetSched(TherapID) {
-    try {
-        const SchedRes = await fetch("./HomePageAPI/TherapistsSchedAPI.php", {
-            method: "POST",
-            body: JSON.stringify({
-                "TID": TherapID // Therapist ID sent in the request
-            }),
-            headers: {
-                'Content-Type': 'application/json' // Ensure correct content type
-            }
-        });
-
-        // Parse the response as JSON
-        const scheddata = await SchedRes.json();
-
-        // Target the <p id="AM"></p> element
-        const amElement = document.getElementById("AM");
-
-        // Clear the content of the element before appending new data
-        amElement.innerHTML = "";
-
-        // Check if the response contains a message or schedules
-        if (scheddata.message) {
-            amElement.innerHTML = scheddata.message; // Display the "No Record found" message
-        } else {
-            // Loop through each schedule and append its details to the HTML element
-            scheddata.forEach(schedule => {
-                const schedId = schedule.Sched_id;
-                const day = schedule.Day;
-                const startTime = schedule.Start_ime;  // Typo: Start_ime in the PHP data
-                const endTime = schedule.End_Time;
-                const note = schedule.Note;
-                const stat = schedule.Status;
-
-                // Create a string of HTML for each schedule
-                const scheduleHTML = `
-                    <p>Schedule ID: ${schedId}</p>
-                    <p>Day: ${day}</p>
-                    <p>Start Time: ${startTime}</p>
-                    <p>End Time: ${endTime}</p>
-                    <p>Note: ${note}</p>
-                    <p>Status: ${stat}</p>
-                    <hr>
-                `;
-
-                // Append the schedule information to the element
-                amElement.innerHTML += scheduleHTML;
+            btnPM.addEventListener('click', function() {
+                amSchedule.style.display = 'none';
+                pmSchedule.style.display = 'block';
             });
         }
 
-    } catch (error) {
-        console.error('Error:', error);
-        document.getElementById("AM").innerHTML = "An error occurred while fetching schedules.";
-    }
-}
-    
+        async function suway() {
+            try {
+                const response = await fetch("./HomePageAPI/TheraPistsAPI.php", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        'ID': "<?php echo $_SESSION["sess_id"]; ?>" 
+                    })
+                });
+                const data = await response.json();
+                const fullname = `${data.fname} ${data.mname.charAt(0)}. ${data.lname}`;
+                document.getElementById("fllname").innerText = fullname;
+                document.getElementById("ProfPic").src = `ProfilePic/${data.ProfPic}`;
+                document.getElementById("case_handled").innerText = data.case;
+                document.getElementById("City").innerText = data.city;
+                document.getElementById("Radius").innerText = data.radius;
 
-            suway(); // Call suway() when the page is fully loaded
-            GetSched(TherapID);
-        });
-    </script>
+                // Assign therapist's ID to the global variable
+                TherapID = data.therapitst_id;
+
+                // Now call GetSched with the therapist's ID
+                GetSched(TherapID);
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function GetSched(TherapID) {
+            try {
+                const SchedRes = await fetch("./HomePageAPI/TherapistsSchedAPI.php", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        "TID": TherapID 
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const scheddata = await SchedRes.json();
+                const amElement = document.getElementById("AM");
+                amElement.innerHTML = "";
+
+                if (scheddata.message) {
+                    amElement.innerHTML = scheddata.message;
+                } else {
+                    scheddata.forEach(schedule => {
+                        const scheduleHTML = `
+                            <button value="${schedule.Sched_id}">${schedule.Day}<br>
+                            ${schedule.Start_ime}/${schedule.End_Time}<br> ${schedule.Note}
+                            </button>
+                        `;
+                        amElement.innerHTML += scheduleHTML;
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById("AM").innerHTML = "An error occurred while fetching schedules.";
+            }
+        }
+
+        // Call suway() when the page is fully loaded
+        suway();
+    });
+</script>
+
 </body>
 
 </html>
