@@ -13,7 +13,6 @@ include("databse.php");
 session_start();
 
 echo $_SESSION["sess_id"];
-
 ?>
 
 <body>
@@ -30,7 +29,7 @@ echo $_SESSION["sess_id"];
         <!-- Collapsible menu -->
         <div class="collapse navbar-collapse mt-5 d-flex justify-content-end mt-5" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a href="Appointment.php" class="nav-link">Appointment</a></li>
+                <li class="nav-item"><a href="TherapistsAppointment.php" class="nav-link">Appointment</a></li>
                 <li class="nav-item"><a class="nav-link">History</a></li>
                 <li class="nav-item"><a class="nav-link">Reminder</a></li>
                 <li class="nav-item"><a class="nav-link">Notification</a></li>
@@ -95,7 +94,7 @@ echo $_SESSION["sess_id"];
 
     <script src="js/bootstrap.bundle.min.js"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
         const btnAM = document.getElementById('BtnAM');
         const btnPM = document.getElementById('BtnPM');
         const amSchedule = document.getElementById('AM-schedule');
@@ -124,17 +123,16 @@ echo $_SESSION["sess_id"];
                 });
                 const data = await response.json();
                 const fullname = `${data.fname} ${data.mname.charAt(0)}. ${data.lname}`;
-                document.getElementById("fllname").innerText = fullname;
+                document.getElementById("fllname").innerText ="Name :"+fullname;
                 document.getElementById("ProfPic").src = `ProfilePic/${data.ProfPic}`;
-                document.getElementById("case_handled").innerText = data.case;
-                document.getElementById("City").innerText = data.city;
-                document.getElementById("Radius").innerText = data.radius;
-
+                document.getElementById("case_handled").innerText ="Case Handled :"+ data.case;
+                document.getElementById("City").innerText ="City :"+ data.city;
+                document.getElementById("Radius").innerText ="Radius :"+ data.radius;
                 // Assign therapist's ID to the global variable
                 TherapID = data.therapitst_id;
-
                 // Now call GetSched with the therapist's ID
                 GetSched(TherapID);
+                SessionPTID(TherapID)
 
             } catch (error) {
                 console.error('Error:', error);
@@ -175,7 +173,15 @@ echo $_SESSION["sess_id"];
                 document.getElementById("AM").innerHTML = "An error occurred while fetching schedules.";
             }
         }
-
+        function  SessionPTID(id){
+                fetch("./HomePageAPI/SessionPTID.php",{
+                    method: "POST",
+                    body: JSON.stringify({
+                        PTID: id,
+                    })
+                });
+               
+            }
         // Call suway() when the page is fully loaded
         suway();
     });
