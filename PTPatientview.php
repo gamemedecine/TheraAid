@@ -167,7 +167,7 @@ if (isset($_POST["BTNDecline"])) {
     // Update the status in the database
     $var_update = "UPDATE tbl_appointment SET
                          status='$var_status' 
-                         WHERE appointment_id=" . $_SESSION["sess_ApntmntId"];
+                         WHERE appointment_id=".$_SESSION["sess_ApntmntId"];
     $var_upqry = mysqli_query($var_conn, $var_update);
 
     if ($var_upqry) {
@@ -210,7 +210,7 @@ if (isset($_POST["BTNDecline"])) {
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                                 Accpet Patient
                             </button>
-                            <button type="submit" class="btn btn-danger" name="BTNDecline">Decline</button>
+                            <button type="button" data-bs-toggle="modal" class="btn btn-danger" data-bs-target="#declineModal" >Decline</button>
 
                         </div>
                     </div>
@@ -259,6 +259,42 @@ if (isset($_POST["BTNDecline"])) {
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="submit" name ="BTNsubmit" class="btn btn-primary">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+        <!---->
+        <div class="modal fade" id="declineModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Accept Patient</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">  
+        <?php
+            $var_appntmnt ="SELECT * FROM tbl_appointment WHERE appointment_id=".$_SESSION["sess_ApntmntId"];
+            $var_Aqry=mysqli_query($var_conn,$var_appntmnt);
+
+            $var_get=mysqli_fetch_array($var_Aqry);
+            $var_condition ="";
+            if( $var_get["is_aggreed"] ==1){
+                $var_condition ="Agreed";
+            }else{
+                $var_condition ="Disagreed";
+
+            }
+            ?>
+                <p>Number Of Session: <?php echo $var_get["num_of_session"];?></p>
+                <p>Payment Type : <?php echo $var_get["payment_type"] ?></p>
+                <p>Start Date : <?php echo $var_get["start_date"] ?><p>
+                <p>Date Requested: <?php echo $var_get["Date_creadted"] ?></p>
+                <p>Condition: <?php echo $var_condition;?></p> 
+                <p style="font-size: 40px;">Are you sure to Decline the request? </p>
+          </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" name ="BTNDecline" class="btn btn-danger">Confirm</button>
       </div>
     </div>
   </div>
