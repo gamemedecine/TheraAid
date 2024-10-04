@@ -21,7 +21,8 @@ if (isset($DcodeJSON["TID"])) {
                 "End_Time" => $var_rec["end_time"],
                 "Note" => $var_rec["note"],
                 "Status" => $var_rec["status"],
-                "Date_Created" => $var_rec["date_created"]
+                "Date_Created" => $var_rec["date_created"],
+                "Sched_id" => $var_rec["shed_id"]
             ];
         }
 

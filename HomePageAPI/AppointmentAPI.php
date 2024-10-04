@@ -1,0 +1,7 @@
+<?
+include("databse.php");
+    
+
+
+
+?>

@@ -21,7 +21,7 @@ if( isset($DcodeJSON["ID"])
                              T.therapist_id 
                         FROM tbl_therapists T 
                         JOIN tbl_user U ON T.user_id = U.User_id 
-                        WHERE T.user_id =".$var_id;
+                        WHERE T.therapist_id  =".$var_id;
     $var_qry = mysqli_query($var_conn, $var_getTherapists);
     if(mysqli_num_rows($var_qry)>0){
         $var_rec = mysqli_fetch_array($var_qry);

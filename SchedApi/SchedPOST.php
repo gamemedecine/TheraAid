@@ -23,7 +23,7 @@ if( isset($DCodeJSON["therapists_id"]) &&
     
     echo $var_Tid."<br>";
     echo implode($var_Day)."<br>";
-    $var_EMPDays = implode($var_Day);
+    $var_EMPDays = implode(",",$var_Day);
     echo $var_Stime."<br>";
     echo $var_Etime."<br>";
     echo $var_Note."<br>";
