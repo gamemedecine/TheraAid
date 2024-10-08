@@ -6,7 +6,7 @@ $DcodeJSON = json_decode($JSONDATA, true);
 
 if (isset($DcodeJSON["TID"])) {
     $var_TID = $DcodeJSON["TID"];
-    $var_slctSched = "SELECT * FROM tbl_sched WHERE therapists_id=$var_TID";
+    $var_slctSched = "SELECT * FROM tbl_sched WHERE therapists_id=$var_TID AND status LIKE '%Available'";
     $var_schedQry = mysqli_query($var_conn, $var_slctSched);
 
     $schedules = []; // Create an array to store schedules

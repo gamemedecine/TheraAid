@@ -18,7 +18,7 @@ $var_radBtn = "";
 
 $var_day = "";
 
-echo $_SESSION["sess_PtntID"]; // Patient ID
+echo $_SESSION["sess_PTID"]; // Patient ID
 
 $var_Apdata = "SELECT * FROM tbl_sched WHERE shed_id=" . $var_SchedID;
 $var_schedqry = mysqli_query($var_conn, $var_Apdata);

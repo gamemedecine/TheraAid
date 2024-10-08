@@ -7,9 +7,9 @@ $JSNDATA =file_get_contents(filename:"php://input");
 $DcodeJSON = json_decode($JSNDATA,true);
 
 
-if(isset($DcodeJSON["PTID"])){
+if(isset($DcodeJSON["PNTID"])){
 
-    $_SESSION["sess_PTID"]=$DcodeJSON["PTID"];
+    $_SESSION["sess_PtntID"]=$DcodeJSON["PNTID"];
    
-   
+    
 }

@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <?php
-    $var_conn =mysqli_connect("localhost","root","","theraaid");
+    include("databse.php");
 ?>
 <style>
     *{
@@ -100,6 +100,7 @@
                      u.Bday,
                     u.ContactNum, 
                     u.Email, 
+                    u.E_wallet,
                     t.case_handled,
                     t.city,
                     t.Radius, 
@@ -136,12 +137,20 @@
         $var_byear=substr($var_Date,0,4);    
         $var_Age = $var_year-$var_byear;
 
-    }
-    else{
+    }else{
         echo "No records found";
+    }
+    $var_UId = $var_get['User_id'];
+    $var_ammnt = "";
+    if(isset($_POST["BtnSubmit"])){
+        $var_ammnt = floatval($_POST["TxtMoney"]);
+        
+        $var_updt = "UPDATE tbl_user SET E_wallet= $var_ammnt WHERE User_id =  $var_UId ";
+        $var_upqry = mysqli_query($var_conn,$var_updt);
     }
 ?>
 <body>
+    <form method="POST" action="TherapistsProfilePage.php">
     <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-0">
         <!-- Navbar brand with logo -->
         <a class="navbar-brand d-flex align-items-center" href="#">
@@ -155,7 +164,7 @@
         <!-- Collapsible menu -->
         <div class="collapse navbar-collapse mt-5" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <lili class="nav-item"><a href="TherapistsHomePage.php" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="TherapistsHomePage.php" class="nav-link">Home</a></li>
                 <li class="nav-item"><a href="Appointment.php" class="nav-link">Appointment</a></li>
                 <li class="nav-item"><a class="nav-link">History</a></li>
                 <li class="nav-item"><a class="nav-link">Reminder</a></li>
@@ -164,7 +173,7 @@
                 <li class="nav-item">
                     <a href="TherapistsProfilePage.php" class="nav-link">Profile</a>
                     <ul class="logout">
-                        <li><a href="#">Logout</a></li>
+                        <li><a href="logout.php">Logout</a></li>
                     </ul>
                 </li>
             </ul> 
@@ -183,6 +192,8 @@
             <div class="Case row">
                         <div class="col-md-6">
                             <p>Case Handled: <?php echo $var_CaseHndld;?></p><br>
+                          
+                            <h2>User ID <?php echo $var_get["User_id"];?></h2>
                         </div>
                         <div class="col-md-6">
                             <label>Area of Operation:</label><br>
@@ -198,7 +209,30 @@
                
         </div>   
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  Launch demo modal
+</button>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">E_wallet</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h3>Balance: <?php echo $var_get["E_wallet"]?></h3>
+            <label>Top up</label><input type="text" name="TxtMoney" placeholder="₱" required>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" name="BtnSubmit" class="btn btn-primary">Top-up</button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+<script src="js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 <style>

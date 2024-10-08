@@ -1,0 +1,23 @@
+SELECT  A.num_of_session, 
+		A.payment_type, 
+        A.start_date, 
+      	A.date_accepted, 
+        A.status,
+        A.rate, 
+        A.Date_creadted,
+        P.P_case,
+        U.Fname,
+		U.mname,
+		U.Lname,
+		UT.Lname,
+        UT.Fname,
+		UT.mname,
+		T.case_handled
+		
+		FROM tbl_appointment A
+		JOIN tbl_patient P ON P.patient_id = A.patient_id
+		JOIN tbl_user U ON P.user_id = U.User_id
+		JOIN tbl_therapists T ON T.therapist_id = A.therapists_id
+        JOIN tbl_user UT ON T.user_id = UT.User_id
+        WHERE A.appointment_id =24
+        

@@ -20,6 +20,7 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
 ?>
 
 <body>
+    <a style="font-size:20px; color:red;"href="PatientHomePage.php">Back</a>
     <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-0">
         <!-- Navbar brand with logo -->
         <a class="navbar-brand d-flex align-items-center" href="#">
@@ -168,7 +169,7 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
                             buttons.forEach(function(button) {
                                 button.addEventListener('click', function() {
                                     var SlctedID = this.value;
-                                    SessionSched(SlctedID); 
+                                    CheckChed("<?php echo $_SESSION["sess_PtntID"]?>"); 
                                 });
                             })
 
@@ -180,6 +181,30 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
                     document.getElementById("AM").innerHTML = "An error occurred while fetching schedules.";
                 }
             }
+            //CHECK IF THE PATIENT HAVE STATUS OTHER THAN "VACANT"
+            async function CheckChed(PatID){
+                    try{
+                        const schedRes = await fetch("./PatientViewAPI/CheckSchedAPI.php",{
+                            method:"POST",
+                            body: JSON.stringify({
+                                "PATID":PatID
+                            }),
+                            headers:{
+                                'Content-Tpe':'application/json'
+                            }
+                        });
+                        const resSched = await schedRes.text();
+                        if(resSched  === "1"){
+                            alert("You have already booked an appoitment and session");
+                        }
+                        if(resSched === "0"){
+                            SessionSched(SlctedID); 
+                        }
+                    }catch(error){
+                        comsole.error('Error:',error);
+                    }
+            }
+          
             function  SessionSched(SlctedID){
                 fetch("./PatientViewAPI/SelectedDateAPI.php",{
                     method: "POST",

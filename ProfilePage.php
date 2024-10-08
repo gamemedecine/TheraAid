@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <?php
-    $var_conn =mysqli_connect("localhost","root","","theraaid");
+    include("databse.php");
 ?>
 <style>
     *{
@@ -97,6 +97,7 @@
                      u.Lname, 
                      u.Mname, 
                      u.Bday,
+                     u.E_wallet,
                     u.ContactNum, 
                     u.Email, 
                     p.P_case,
@@ -122,6 +123,7 @@
     $var_Stret ="";
     $var_Medpic="";
     $var_Assesment="";
+   
     if(mysqli_num_rows($var_chk)>0){
         $var_get=mysqli_fetch_array($var_chk);
         $var_Case=$var_get["P_case"];
@@ -140,13 +142,23 @@
         $var_MI = substr($var_Mname ,0,1);   
         $var_byear=substr($var_Date,0,4);    
         $var_Age = $var_year-$var_byear;
+        $var_Balance =  $var_get["E_wallet"];
 
     }
     else{
         echo "No records found";
     }
+    
+    if(isset($_POST["BtnSubmit"])){
+        $var_ammnt = floatval($_POST["TxtMoney"]);
+        $var_UpdE_wallet = $var_ammnt+$var_Balance;
+        
+        $var_updt = "UPDATE tbl_user SET E_wallet= $var_UpdE_wallet WHERE User_id =  $var_profid ";
+        $var_upqry = mysqli_query($var_conn,$var_updt);
+    }
 ?>
 <body>
+    <form method="POST" action="ProfilePage.php">
     <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-0">
         <!-- Navbar brand with logo -->
         <a class="navbar-brand d-flex align-items-center" href="#">
@@ -189,6 +201,7 @@
             <div class="Case row">
                         <div class="col-md-6">
                             <p>Case : <?php echo $var_Case;?></p><br>
+                            <h2>Balance ₱<?php echo $var_Balance;?></h2>
                             <p>Description : <?php echo $var_CaseDesc;?></p>
                         </div>
                         <div class="col-md-6">
@@ -208,7 +221,30 @@
                
         </div>   
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  Launch demo modal
+</button>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">E_wallet</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h3>Balance: <?php echo $var_Balance?></h3>
+            <label>Top up</label><input type="text" name="TxtMoney" placeholder="₱" required>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" name="BtnSubmit" class="btn btn-primary">Top-up</button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+<script src="js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 <style>

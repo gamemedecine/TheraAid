@@ -161,6 +161,7 @@ if(isset($_POST["BTNsubmit"])){
         "error";
     }
 }
+//Decline Code
 if (isset($_POST["BTNDecline"])) {
     $var_status = "declined"; // Set status to "declined"
 

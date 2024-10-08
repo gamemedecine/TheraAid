@@ -17,7 +17,6 @@
 
 
 
-
 ?>
 
 <body>
@@ -104,9 +103,9 @@
                     caseDesc = data.case;
                     PtntID = data.PtntID;
                    
-
+                    SessionPNTID(PtntID);
                     GETtherapists(city, caseDesc);
-
+                  
                 } catch (error) {
                     console.error('Error:', error);
                 }
@@ -142,7 +141,7 @@
                             // Add event listener for button click
                             PTBTN.addEventListener('click', function() {
                                 var SlctedID = this.value;
-                                SessionID(SlctedID,PtntID); 
+                                SessionID(SlctedID); 
                                 //  alert(SlctedID+"  "+PtntID);
                             });
 
@@ -153,16 +152,25 @@
                     console.log('Error:', error);
                 }
             }
-            function  SessionID(id,PtntID){
+            function  SessionID(id){
                 fetch("./PatientHomePageAPI/SessionAPI.php",{
                     method: "POST",
                     body: JSON.stringify({
                         PTID: id,
-                        PtntID: PtntID,
+    
                     })
                 });
                 window.location.href = "PatientView.php";
 
+            }
+            function  SessionPNTID(PtntID){
+                fetch("./PatientHomePageAPI/SessionPID.php",{
+                    method: "POST",
+                    body: JSON.stringify({
+                        PNTID: PtntID,
+                    })
+                });
+              
             }
         });
     </script>
