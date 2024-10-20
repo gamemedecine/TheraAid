@@ -13,14 +13,12 @@
 include("databse.php");
 session_start();
 
-echo  "therapists ID".$_SESSION["sess_PTID"]."\n";
-echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
-
-
+echo "Therapist ID: " . $_SESSION["sess_PTID"] . "\n";
+echo "Patient ID: " . $_SESSION["sess_PtntID"] . "\n";
 ?>
 
 <body>
-    <a style="font-size:20px; color:red;"href="PatientHomePage.php">Back</a>
+    <a style="font-size:20px; color:red;" href="PatientHomePage.php">Back</a>
     <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-0">
         <!-- Navbar brand with logo -->
         <a class="navbar-brand d-flex align-items-center" href="#">
@@ -32,7 +30,7 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
             <span class="navbar-toggler-icon"></span>
         </button>
         <!-- Collapsible menu -->
-        <div class="collapse navbar-collapse mt-5 d-flex justify-content-end mt-5" id="navbarNav">
+        <div class="collapse navbar-collapse mt-5 d-flex justify-content-end" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a href="Appointment.php" class="nav-link">Appointment</a></li>
                 <li class="nav-item"><a class="nav-link">History</a></li>
@@ -50,7 +48,7 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
         <div class="white-box">
             <div class="flex-container">
                 <div class="box">
-                    <div class="Details-box  rounded">
+                    <div class="Details-box rounded">
                         <div class="TherapistInfo rounded">
                             <img id="ProfPic" class="border rounded-circle" src="" alt="Profile Picture">
                             <p id="fllname"></p>
@@ -58,7 +56,6 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
                             <p id="City"></p>
                             <p id="Radius"></p>
                             <p id="ID"></p>
-
                             <p>Rating: </p>
                         </div>
                         <div class="TherapistScghed">
@@ -76,20 +73,16 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
                                     <!-- PM Schedule content goes here -->
                                 </div>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
-    <!---->
-
 
     <script src="js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const btnAM = document.getElementById('BtnAM');
             const btnPM = document.getElementById('BtnPM');
             const amSchedule = document.getElementById('AM-schedule');
@@ -97,12 +90,12 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
             let TherapID;
 
             if (btnAM && btnPM && amSchedule && pmSchedule) {
-                btnAM.addEventListener('click', function() {
+                btnAM.addEventListener('click', function () {
                     amSchedule.style.display = 'block';
                     pmSchedule.style.display = 'none';
                 });
 
-                btnPM.addEventListener('click', function() {
+                btnPM.addEventListener('click', function () {
                     amSchedule.style.display = 'none';
                     pmSchedule.style.display = 'block';
                 });
@@ -114,15 +107,18 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
                         method: "POST",
                         body: JSON.stringify({
                             'ID': "<?php echo $_SESSION["sess_PTID"]; ?>"
-                        })
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
                     });
                     const data = await response.json();
                     const fullname = `${data.fname} ${data.mname.charAt(0)}. ${data.lname}`;
-                    document.getElementById("fllname").innerText = "Name :" + fullname;
+                    document.getElementById("fllname").innerText = "Name: " + fullname;
                     document.getElementById("ProfPic").src = `ProfilePic/${data.ProfPic}`;
-                    document.getElementById("case_handled").innerText = "Case Handled :" + data.case;
-                    document.getElementById("City").innerText = "City :" + data.city;
-                    document.getElementById("Radius").innerText = "Radius :" + data.radius;
+                    document.getElementById("case_handled").innerText = "Case Handled: " + data.case;
+                    document.getElementById("City").innerText = "City: " + data.city;
+                    document.getElementById("Radius").innerText = "Radius: " + data.radius;
                     // Assign therapist's ID to the global variable
                     TherapID = data.therapitst_id;
                     // Now call GetSched with the therapist's ID
@@ -155,24 +151,23 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
                         scheddata.forEach(schedule => {
                             var SchedID = schedule.Sched_id;
                             var SchedDay = schedule.Day;
-                            var SchedDay = schedule.Day;
                             var Stime = schedule.Start_ime;
                             var Etime = schedule.End_Time;
                             var Note = schedule.Note;
                             const scheduleHTML = `
-                            <button class="schedule-btn" value="${SchedID}">${schedule.Day}<br>
+                            <button class="schedule-btn" value="${SchedID}">${SchedDay}<br>
                             ${Stime}/${Etime}<br>${Note}
                             </button>
                         `;
                             amElement.innerHTML += scheduleHTML;
-                            const buttons = amElement.querySelectorAll('.schedule-btn');
-                            buttons.forEach(function(button) {
-                                button.addEventListener('click', function() {
-                                    var SlctedID = this.value;
-                                    CheckChed("<?php echo $_SESSION["sess_PtntID"]?>"); 
-                                });
-                            })
+                        });
 
+                        const buttons = amElement.querySelectorAll('.schedule-btn');
+                        buttons.forEach(function (button) {
+                            button.addEventListener('click', function () {
+                                var SlctedID = this.value;
+                                CheckChed("<?php echo $_SESSION["sess_PtntID"] ?>", SlctedID); 
+                            });
                         });
                     }
 
@@ -181,43 +176,50 @@ echo "Patient ID".$_SESSION["sess_PtntID"]."\n";
                     document.getElementById("AM").innerHTML = "An error occurred while fetching schedules.";
                 }
             }
-            //CHECK IF THE PATIENT HAVE STATUS OTHER THAN "VACANT"
-            async function CheckChed(PatID){
-                    try{
-                        const schedRes = await fetch("./PatientViewAPI/CheckSchedAPI.php",{
-                            method:"POST",
-                            body: JSON.stringify({
-                                "PATID":PatID
-                            }),
-                            headers:{
-                                'Content-Tpe':'application/json'
-                            }
-                        });
-                        const resSched = await schedRes.text();
-                        if(resSched  === "1"){
-                            alert("You have already booked an appoitment and session");
+
+            // CHECK IF THE PATIENT HAS STATUS OTHER THAN "VACANT"
+            async function CheckChed(PatID, SlctedID) {
+                try {
+                    const schedRes = await fetch("./PatientViewAPI/CheckSchedAPI.php", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            "PATID": PatID
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
                         }
-                        if(resSched === "0"){
-                            SessionSched(SlctedID); 
-                        }
-                    }catch(error){
-                        comsole.error('Error:',error);
+                    });
+                    const resSched = await schedRes.text();
+                    if (resSched === "1") {
+                        alert("You have already booked an appointment and session");
                     }
+                    if (resSched === "0") {
+                        SessionSched(SlctedID); 
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
             }
-          
-            function  SessionSched(SlctedID){
-                fetch("./PatientViewAPI/SelectedDateAPI.php",{
+
+            function SessionSched(SlctedID) {
+                fetch("./PatientViewAPI/SelectedDateAPI.php", {
                     method: "POST",
                     body: JSON.stringify({
-                        SchedID:SlctedID
-                    })
+                        SchedID: SlctedID
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(() => {
+                    window.location.href = "PatAppointment.php"; // Redirect to PatAppointment.php
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                 });
-                window.location.href = "PatAppointment.php";
-
             }
 
-
-            // Call suway() when the page is fully loaded
+            // Call PTProf() when the page is fully loaded
             PTProf();
         });
     </script>

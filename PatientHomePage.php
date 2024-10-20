@@ -14,12 +14,48 @@
 
 </head>
 <?php
+include("databse.php");
+$var_rrminder;
+  /// QEUERY RHE REMINDER USING THE SESSIONED USER_ID "sess_id"
+  $var_remind = 
+  "SELECT TB.reminder_date, 
+  TB.reminder_messsage,
+   TB.reminder_status 
+  FROM tbl_reminder TB 
+  JOIN tbl_appointment AP ON AP.appointment_id = TB.appointment_id JOIN tbl_patient P ON P.patient_id = AP.patient_id 
+  JOIN tbl_user U ON U.User_id = P.user_id WHERE P.user_id=".$_SESSION["sess_id"];
+  $var_Rqry = mysqli_query($var_conn,$var_remind);
+  $var_message ="";
 
-
-
+  $var_sampleDate = "2024-10-12";// EXAMPLE
+  $var_currentDate = date($var_sampleDate);//date('Y-m-d');
+ echo "current Date ".$var_currentDate."<br>";
+  if(mysqli_num_rows($var_Rqry)>0){
+    $var_Rrec = mysqli_fetch_array($var_Rqry);
+    $var_Date = explode(",",$var_Rrec["reminder_date"]);
+    echo "Upcoming Date";
+    print_r($var_Date);
+    if(in_array($var_currentDate,$var_Date)){
+        $var_message= $var_Rrec["reminder_messsage"];
+    }   
+    else{
+        $var_message= "No Session for today";
+    }
+   
+  
+  }else{
+    $var_message= "";
+  }
+  
+  
 ?>
 
 <body>
+    <?php
+        if($var_Rqry){
+            echo "<h1>".$var_message."</h1>";
+          }
+    ?>
     <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-0">
         <!-- Navbar brand with logo -->
         <a class="navbar-brand d-flex align-items-center" href="#">
@@ -173,6 +209,8 @@
               
             }
         });
+       
+        
     </script>
 
 

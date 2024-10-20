@@ -1,9 +1,9 @@
 <?php
 include("databse.php");
 session_start();
-echo  $_SESSION["sess_APID"];
 
-$var_APID =  $_SESSION["sess_APID"];
+
+
 
 ?>
 <!DOCTYPE html>
@@ -124,20 +124,24 @@ JOIN tbl_patient P ON P.patient_id = A.patient_id
 JOIN tbl_user U ON P.user_id = U.User_id 
 JOIN tbl_therapists T ON T.therapist_id = A.therapists_id
 JOIN tbl_user UT ON T.user_id = UT.User_id
-WHERE A.appointment_id=".$var_APid;
+WHERE A.appointment_id=" . $var_APid;
 $var_chk = mysqli_query($var_conn, $var_qry);
 $var_get = mysqli_fetch_array($var_chk);
 $var_PTAge = "";
-$var_rate =$var_get["rate"];
-$var_PtntE_wallet=floatval($var_get["PtntE_wallet"]);
-$VAR_PTNTID =$var_get["PtntID"];
+$var_rate = $var_get["rate"];
+$var_PtntE_wallet = floatval($var_get["PtntE_wallet"]);
+$VAR_PTNTID = $var_get["PtntID"];
 
-$var_PTID=$var_get["PTID"];
-$var_PTE_wallet =floatval($var_get["PTE_wallet"]);
+$var_PTID = $var_get["PTID"];
+$var_PTE_wallet = floatval($var_get["PTE_wallet"]);
 $var_BY = date('Y', strtotime($var_get["PT_Bday"]));
 $var_currDate = date("Y");
 $var_PTAge = $var_currDate - $var_BY;
 $var_Rate = "";
+$var_Sdate = $var_get["start_date"];
+$var_NumofSession = $var_get["num_of_session"];
+$data_day = $var_get["day"];
+
 if (isset($_POST["BTNsubmit"])) {
     $var_Rate = intval($_POST["TxtRate"]);
     $var_status = "Responded";
@@ -145,7 +149,7 @@ if (isset($_POST["BTNsubmit"])) {
     $var_update = "UPDATE tbl_appointment SET
                          rate=$var_Rate,
                          status='$var_status' 
-                         WHERE appointment_id=" . $_SESSION["sess_ApntmntId"];
+                         WHERE appointment_id=" . $var_AppID;
     $var_upqry = mysqli_query($var_conn, $var_update);
 
     if ($var_upqry) {
@@ -165,7 +169,7 @@ if (isset($_POST["BTNDecline"])) {
     // Update the status in the database
     $var_update = "UPDATE tbl_appointment SET
                          status='$var_status' 
-                         WHERE appointment_id=" . $_SESSION["sess_ApntmntId"];
+                         WHERE appointment_id=" . $var_AppID;
     $var_upqry = mysqli_query($var_conn, $var_update);
 
     if ($var_upqry) {
@@ -178,41 +182,45 @@ if (isset($_POST["BTNDecline"])) {
         echo "Error: Could not decline the appointment.";
     }
 }
-$var_ammnt="";
-if(isset($_POST["BtnSubmit"])){
+$var_ammnt = "";
+if (isset($_POST["BtnSubmit"])) {
     $var_ammnt = floatval($_POST["TxtAmount"]);
 
-    if($var_ammnt !=  $var_get["rate"]){
+    if ($var_ammnt !=  $var_get["rate"]) {
         echo "Please enter the proper amount";
     }
-    if($var_get["rate"] >$var_PtntE_wallet){
+    if ($var_get["rate"] > $var_PtntE_wallet) {
         echo "Insufecient valance Please Top-up";
-    }
-    else{
+    } else {
         $var_Payment = "INSERT INTO tbl_payment (appointment_id,amount,status)
         VALUES ('$var_APid','$var_ammnt','Paid')";
-        $var_Pqry=mysqli_query($var_conn,$var_Payment);
+        $var_Pqry = mysqli_query($var_conn, $var_Payment);
 
-        if($var_Pqry){
+        if ($var_Pqry) {
             //update therapists E-wallet Account PtntID
-            $var_UpdtE_wallet= $var_ammnt+$var_PTE_wallet;
+            $var_UpdtE_wallet = $var_ammnt + $var_PTE_wallet;
             //echo $var_UpdtE_wallet;
-            $var_Tupdate ="UPDATE tbl_user SET E_wallet=   $var_UpdtE_wallet WHERE User_id = $var_PTID";
-            $var_TupdatePT = mysqli_query($var_conn,$var_Tupdate);
-            
+            $var_Tupdate = "UPDATE tbl_user SET E_wallet=   $var_UpdtE_wallet WHERE User_id = $var_PTID";
+            $var_TupdatePT = mysqli_query($var_conn, $var_Tupdate);
+
             //UPDATE THE E WALLET OF THE PATIENT "DEDUCT"
-            $var_deductE_wallet= $var_PtntE_wallet-$var_ammnt;
+            $var_deductE_wallet = $var_PtntE_wallet - $var_ammnt;
             //echo  $var_deductE_wallet;
-            $var_TupdatePaatient ="UPDATE tbl_user SET E_wallet= $var_deductE_wallet WHERE User_id =$VAR_PTNTID";
+            $var_TupdatePaatient = "UPDATE tbl_user SET E_wallet= $var_deductE_wallet WHERE User_id =$VAR_PTNTID";
             $var_TupdatePTNT = mysqli_query($var_conn, $var_TupdatePaatient);
 
             //UPDATE SCHED STATUS TO ONGOING/IN USED
-            $var_SchedUpdate = "UPDATE tbl_sched SET status = 'On-Going' WHERE shed_id =".$var_get["shed_id"];
-            $var_SchedUpdtQRY =mysqli_query($var_conn,$var_SchedUpdate);
-            
+            $var_SchedUpdate = "UPDATE tbl_sched SET status = 'On-Going' WHERE shed_id =" . $var_get["shed_id"];
+            $var_SchedUpdtQRY = mysqli_query($var_conn, $var_SchedUpdate);
+
             //UPDATE APPOINTMENT STATUS TO ONGOING/IN USED
-             $var_AppntmntUpdate = "UPDATE tbl_appointment SET status = 'On-Going' WHERE appointment_id =".$var_APid;
-             $var_AppntmntUpdtQRY =mysqli_query($var_conn, $var_AppntmntUpdate);
+            $var_AppntmntUpdate = "UPDATE tbl_appointment SET status = 'On-Going' WHERE appointment_id =" . $var_APid;
+            $var_AppntmntUpdtQRY = mysqli_query($var_conn, $var_AppntmntUpdate);
+
+            if ($var_SchedUpdtQRY) {
+                //CREATE A REMINDER
+                SetReminder($var_APid, $var_Sdate, $data_day, $var_NumofSession, $var_conn);
+            }
         }
     }
 }
@@ -220,75 +228,117 @@ if(isset($_POST["BtnSubmit"])){
 
 <body>
     <a style="font-size: 50px; color:red" href="PatientHomePage.php">Back</a>
-            <form method="POST" action="PATTherapistView.php">
-                </nav>
-                <div class="container"> <!-- Added container for layout -->
-                    <div class="basicInfo">
-                        <img class="rounded-circle" src="photos/profile.jpg" alt="Profile Pic"><br><br>
-                        <p><?php echo $var_get["PT_fllname"]; ?></p>
-                        <p><?php echo $var_PTAge; ?></p>
-                        <p><?php echo $var_get["PT_CntctNum"]; ?></p>
-                        <p><?php echo  $var_get["PT_Email"]; ?></p>
-                        <button>Edit</button>
-                    </div>
-                    <div class="AddInfo">
-                        <div class="Case row">
-                            <div class="col-md-6">
-                                <h3><?php
-                                    $data = $var_get["day"];
-                                    $formattedData = str_replace(",", "-", $data);
-                                    echo $formattedData . "<br>";
+    <form method="POST" action="PATTherapistView.php">
+        </nav>
+        <div class="container"> <!-- Added container for layout -->
+            <div class="basicInfo">
+                <img class="rounded-circle" src="photos/profile.jpg" alt="Profile Pic"><br><br>
+                <p><?php echo $var_get["PT_fllname"]; ?></p>
+                <p><?php echo $var_PTAge; ?></p>
+                <p><?php echo $var_get["PT_CntctNum"]; ?></p>
+                <p><?php echo  $var_get["PT_Email"]; ?></p>
+                <button>Edit</button>
+            </div>
+            <div class="AddInfo">
+                <div class="Case row">
+                    <div class="col-md-6">
+                        <h3><?php
 
-                                    echo $var_get["start_time"] . "-" . $var_get["end_time"];
-                                    ?></h3>
-                                <p>Case : <?php echo $var_get["P_case"]; ?></p>
-                                <h1>Balance: <?php echo $var_PtntE_wallet;?></h1>
-                                <p>Description : <?php echo $var_get["case_desc"]; ?></p>
-                                <p>Type Of Payment : <?php echo $var_get["payment_type"]; ?></p>
-                                <p>Start Date : <?php echo $var_get["start_date"]; ?></p>
-                                <p>Rate : <?php echo $var_get["rate"]; ?></p>
-                                <p>Appointment status : <?php echo $var_get["status"]; ?></p>
+                            $formattedData = str_replace(",", "-", $data_day);
+                            echo $formattedData . "<br>";
 
-                            </div>
-                            <div class="col-md-6">
-                                <label>Address: <?php echo $var_get["patient_address"]; ?></label><br>
-                            </div>
-                            <div>
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                    Pay
-                                </button>
-                                <p style="color:red;">If payment is not recieved within 24 hours The appointment will be canceled</p>
-                            </div>
-                        </div>
-
+                            echo $var_get["start_time"] . "-" . $var_get["end_time"];
+                            ?></h3>
+                        <p>Case : <?php echo $var_get["P_case"]; ?></p>
+                        <h1>Balance: <?php echo $var_PtntE_wallet; ?></h1>
+                        <p>Description : <?php echo $var_get["case_desc"]; ?></p>
+                        <p>Type Of Payment : <?php echo $var_get["payment_type"]; ?></p>
+                        <p>Start Date : <?php echo $var_Sdate; ?></p>
+                        <p>Rate : <?php echo $var_get["rate"]; ?></p>
+                        <p>Appointment status : <?php echo $var_get["status"]; ?></p>
 
                     </div>
-                </div>
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel">Payment</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                
-                                <p>Rate :<?php echo $var_get["rate"]; ?></p>
-                                <label>Amount</label><input type="text" name="TxtAmount"  placeholder="₱" required/>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit " name="BtnSubmit" class="btn btn-primary">Confirm Payment</button>
-                            </div>
-                        </div>
+                    <div class="col-md-6">
+                        <label>Address: <?php echo $var_get["patient_address"]; ?></label><br>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            Pay
+                        </button>
+                        <p style="color:red;">If payment is not recieved within 24 hours The appointment will be canceled</p>
                     </div>
                 </div>
 
-            </form>
-            <script src="js/bootstrap.bundle.min.js"></script>
+
+            </div>
+        </div>
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Payment</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <p>Rate :<?php echo $var_get["rate"]; ?></p>
+                        <label>Amount</label><input type="text" name="TxtAmount" placeholder="₱" required />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit " name="BtnSubmit" class="btn btn-primary">Confirm Payment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+    <script src="js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
+<!--SET REMINDER-->
+<?php
+function SetReminder($var_APid, $var_Sdate, $data_day, $var_NumofSession, $var_conn)
+{
+    $future_dates = [];
+
+    // Convert the string of days into an array (e.g., "Mon,Wed,Fri" becomes ["Mon", "Wed", "Fri"])
+    $selectedDays = explode(',', $data_day);
+
+    // Convert the start date into a DateTime object
+    $startDate = new DateTime($var_Sdate); // Assuming we start from today
+
+    // While loop until we get the required number of meetings
+    while (count($future_dates) < $var_NumofSession) {
+        // Get the current day of the week (D for 3-letter abbreviation)
+        $currentDay = $startDate->format('D');
+
+        // Check if the current day is one of the selected days (e.g., "Mon", "Wed", "Fri")
+        if (in_array($currentDay, $selectedDays)) {
+            // Add the current date to the list of future dates
+            $future_dates[] = $startDate->format('Y-m-d');
+        }
+
+        // Move to the next day
+        $startDate->modify('+1 day');
+    }
+
+    // Convert the array of future dates to a string separated by commas
+    $dates_string = implode(',', $future_dates);
+    $var_RMessage = "You Have An appointment Today";
+    $var_Isread = "unread";
+    $var_setReminder = "INSERT INTO tbl_reminder (appointment_id, reminder_date, reminder_messsage, reminder_status)
+                    VALUES ('$var_APid', '$dates_string', '$var_RMessage', '$var_Isread')";
+    $var_setqry = mysqli_query($var_conn, $var_setReminder);
+}
+
+
+
+
+
+?>
 <style>
     .MedHistory img,
     .Asessment img {

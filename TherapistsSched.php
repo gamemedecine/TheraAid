@@ -165,7 +165,7 @@ $var_Etime = "";
                 if (rText === "1") {
                     alert("This schedule has already been taken.");
                 }else if(rText === "2"){
-                    alert("This time is in between the saved.");
+                    alert("This time is in between the saved schedule");
                 } else if (rText === "0") {
                     alert("This schedule is avaiable.");
 

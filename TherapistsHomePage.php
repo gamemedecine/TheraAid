@@ -31,7 +31,7 @@ echo $_SESSION["sess_id"];
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a href="TherapistsAppointment.php" class="nav-link">Appointment</a></li>
                 <li class="nav-item"><a class="nav-link">History</a></li>
-                <li class="nav-item"><a class="nav-link">Reminder</a></li>
+                <li class="nav-item"><a class="nav-link" href="TherapistsReminder.php">Reminder</a></li>
                 <li class="nav-item"><a class="nav-link">Notification</a></li>
                 <li class="nav-item"><a class="nav-link">Chat</a></li>
                 <a href="TherapistsProfilePage.php" class="nav-link">Profile</a>
