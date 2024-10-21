@@ -19,46 +19,39 @@ if (isset($DcodeJSON["appId"])) {
                     FROM tbl_session SS
                     JOIN tbl_appointment AP ON AP.appointment_id = SS.appointment_id
                     JOIN tbl_reminder RM ON RM.appointment_id = AP.appointment_id
-                    WHERE AP.appointment_id = $var_appid";
+                    WHERE AP.appointment_id = $var_appid AND SS.Date_creadted = '$var_currntDate'";
     $var_sesquery = $var_conn->query($var_session);
 
-    if (mysqli_num_rows($var_sesquery) > 0) {
-        $var_Srec = mysqli_fetch_array($var_sesquery);
+    if (mysqli_num_rows($var_sesquery) > 0) {//CHECK IF THERES ANY DUPLICATE SESSION
+        $var_response = "1";
+    } else {
+        $var_remnider = " SELECT  RM.reminder_date
+                    FROM tbl_reminder RM
+                    JOIN tbl_appointment AP  ON RM.appointment_id = AP.appointment_id
+                    WHERE AP.appointment_id = $var_appid";
+        $var_RMqry = mysqli_query($var_conn, $var_remnider);
+        $var_Srec = mysqli_fetch_array($var_RMqry);
 
         $var_SessDate = explode(",", $var_Srec["reminder_date"]);
 
-        if (!in_array($var_currntDate, $var_SessDate)) {
+        if (!in_array($var_currntDate, $var_SessDate)) { //CHECK OF THERES A SESSION FO TODAY
 
             $var_response = "2";
         } else {
-            $sql = "SELECT 
-	                SS.Date_creadted, RM.reminder_date
-                FROM tbl_session SS 
-                JOIN tbl_appointment AP 
-                ON AP.appointment_id = SS.appointment_id 
-                JOIN tbl_reminder RM 
-                ON RM.appointment_id = AP.appointment_id 
-                WHERE AP.appointment_id = $var_appid;";
-
-            $results = $var_conn->query($sql);
-
-            foreach ($results as $result) {
-                $dateCreated = $result["Date_creadted"];
-
-                if ($dateCreated  ==$var_currntDate  ){
-                    $var_response = "1";
-                    break;
-                }
+            $var_status = "On-Going";
+            $var_insrt ="INSERT INTO `tbl_session`(`status`, `Time_startted`, `appointment_id`,`Date_creadted`) 
+            VALUES ('$var_status','$var_crrntTime', $var_appid,'$var_currntDate')";
+            $var_sessquery = mysqli_query($var_conn,$var_insrt);
+            if($var_sessquery){
+                $var_response = "0";
             }
+           else{
+                $var_response = "error";
+           }
             
           
         }
-        // // 
-
-
-        // }
-    } else {
-        $var_response = "5";
+      
     }
 
     echo $var_response;
