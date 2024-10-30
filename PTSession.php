@@ -2,29 +2,33 @@
 <html lang="en">
 
 <head>
-    <?php 
+    <?php
     include("databse.php");
     session_start();
     echo $_SESSION["sess_PATID"];
     $var_appid =  $_SESSION["sess_PATID"];
     date_default_timezone_set('Asia/Manila'); // Change to your timezone
-    $var_crrntTime =date("h:i:sa");
+    $var_crrntTime = date("h:i:sa");
     //$var_currntDate = date("Y-m-d");
     $var_currntDate = "2024-10-18";
-    echo $var_currntDate."<br>";
+    echo $var_currntDate . "<br>";
     echo  $var_crrntTime;
 
-    
-    $var_sessionList = "SELECT * FROM tbl_session  WHERE appointment_id =".$var_appid;
-    $var_Slist = mysqli_query($var_conn,$var_sessionList);
 
-    
-       
+    $var_sessionList = "SELECT * FROM tbl_session  WHERE appointment_id =" . $var_appid;
+    $var_Slist = mysqli_query($var_conn, $var_sessionList);
+    $var_note = "";
+    $var_Photo = "";
+    $var_sessID = "";
 
-    
-    
+    //Edit Session
 
-    
+
+
+
+
+
+
     ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,7 +80,7 @@
                                 <p id="fllname"></p>
                                 <p id="case"></p>
                                 <p id="City"></p>
-                                <p id ="sess">hellos</p>
+                                <p id="sess">hellos</p>
 
                             </div>
                         </div>
@@ -86,11 +90,26 @@
                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#Session">
                                         +
                                     </button>
-                                   
+
                                 </div>
                                 <div id="sessions">
-                                <p id="check"></p>
-                                
+                                    <?php
+                                    if (mysqli_num_rows($var_Slist) > 0) {
+                                        while ($var_Sesget = mysqli_fetch_array($var_Slist)) {
+                                            $var_note = $var_Sesget["note"];
+                                            $var_sessID = $var_Sesget["session_id"];
+                                            if ($var_note == "") {
+                                                $var_note = "No Note";
+                                                echo "<input id='sessID' name='TxtsessId' value='$var_sessID' hidden>";
+                                                echo '<button type="button" class="btn btn-primary edit-session" id="Editesssion" onclick="openSessionModal(\'' . $var_sessID . '\')">Edit Session</button>';
+                                            }
+                                        }
+                                    } else {
+                                        echo "<h3>No session yet</h3>";
+                                    }
+                                    ?>
+
+
                                 </div>
 
                             </div>
@@ -103,49 +122,49 @@
 
 
         </div>
-
+        <!-- EditSession Modal -->
+        <div class="modal fade" id="SessionModal" tabindex="-1" role="dialog" aria-labelledby="SessionModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="SessionModalLabel">Session</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input id="sessionIDDisplay" name="sessionID" value=""><!-- 'hidden' -->
+                        <label>Note:</label><br>
+                        <textarea style="height:100px; width: 100%;" id="Idnote" name="TxtNote" required></textarea> <label>Images:</label>
+                        <input type="file" id="photos" name="FilePoto" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="BtnSaveId" name="BtnSave">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="Session" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="Session" tabindex="-1" aria-labelledby="Session" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Session</h1>
+                        <h1 class="modal-title fs-5" id="Session">Session</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                    <button type="button" id="StartSession" class="btn btn-primary">Start Session</button>
-                        <!-- <label>Note:</label><br>
-                        <textarea  style="height:100px; width: 100%;" name="TxtDuration" ></textarea> -->
+                        <button type="button" id="StartSession" class="btn btn-primary">Start Session</button>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                       
+
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Modal Edit Session-->
-        <div class="modal fade" id="Editsess" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Session</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <label>Note:</label><br>
-                        <textarea  style="height:100px; width: 100%;" name="TxtDuration" ></textarea>
-                        <input type="file" name="SessPhotos" multiple>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" id="StartSession" class="btn btn-primary">Save</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                       
-                    </div>
-                </div>
-            </div>
-        </div>
+
+
     </form>
 
 
@@ -181,42 +200,74 @@
                 }
             }
 
-          
+
 
             GETPatient();
-            document.getElementById("StartSession").addEventListener("click",() => {
-                checkSession(AppntmntId);});
+            document.getElementById("StartSession").addEventListener("click", () => {
+                checkSession(AppntmntId);
+            });
 
-            async function checkSession(AppntmntId){
-                try{
-                    const response = await fetch("./PTSESSIONAPI/PTcheckSession.php",{
-                        method:"POST",
-                        body:JSON.stringify({
-                            "appId":AppntmntId
+            async function checkSession(AppntmntId) {
+                try {
+                    const response = await fetch("./PTSESSIONAPI/PTcheckSession.php", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            "appId": AppntmntId
                         })
                     })
-                    const res =await response.text();
-                    if(res == "1"){
-                        alert(AppntmntId+"  "+"You have already started a session!");
+                    const res = await response.text();
+                    if (res == "1") {
+                        alert(AppntmntId + "  " + "You have already started a session!");
+                    } else if (res == "2") {
+                        alert(AppntmntId + "  " + "You dont Have a session today!");
+                    } else if (res == "0") {
+                        alert(AppntmntId + "  " + "New session have been added!");
                     }
-                    else if(res =="2"){
-                        alert(AppntmntId+"  "+"You dont Have a session today!");
-                    }
-                    else if(res =="0"){
-                        alert(AppntmntId+"  "+"New session have been added!");
-                    }
-                  
-                }
-               
-            catch (err){
-                console.error(err.message);
 
+                } catch (err) {
+                    console.error(err.message);
+
+                }
             }
+
+
+        });
+
+        function openSessionModal(sessionId) {
+            // Set the session ID in the hidden input field
+            document.getElementById('sessionIDDisplay').value = sessionId;
+
+            // Show the modal
+            var sessionModal = new bootstrap.Modal(document.getElementById('SessionModal'));
+            sessionModal.show();
         }
-    
-            
-    });
-    
+
+        // RECYCLE LANG ANG CODE NIMO DONG NYA EDIT RANI 
+        // BUHAT BAG FILE 'PTEditSess' E BUTANG SA PTSESSIONAPI folder
+        document.getElementById("BtnSaveId").addEventListener("click", () => {
+            var SessID = document.getElementById('sessionIDDisplay').value; // Get the value of the input field
+            var note = document.getElementById('Idnote').value; // Get the value of the textarea
+            var photos = document.getElementById('photos').files;
+
+            // Alert the session ID
+            alert("Session ID: " + SessID);
+
+            // Alert the note
+            if(note === ""){
+                alert("Please Enter a note");
+            }
+            if(photos.length <0){
+                alert("No photos uploaded.");
+            }
+            // Check if any files were selected and alert their names
+            else(photos.length > 0) {
+                var fileNames = [];
+                for (var i = 0; i < photos.length; i++) {
+                    fileNames.push(photos[i].name);
+                }
+                alert("Uploaded Photos: " + fileNames.join(", ")); // Alert the names of the files
+            } 
+        });
     </script>
 
 
@@ -241,12 +292,13 @@
         border-radius: 50px;
         color: black;
     }
-    .sessions,button{
+
+    .sessions,
+    button {
         width: 100%;
         background-color: azure;
-        font-size:20px;
-        border-radius:25px;
+        font-size: 20px;
+        border-radius: 25px;
         height: 60px;
     }
-  
 </style>
