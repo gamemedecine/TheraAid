@@ -256,17 +256,17 @@
             if(note === ""){
                 alert("Please Enter a note");
             }
-            if(photos.length <0){
-                alert("No photos uploaded.");
-            }
+
             // Check if any files were selected and alert their names
-            else(photos.length > 0) {
+            if (photos.length > 0) {
                 var fileNames = [];
                 for (var i = 0; i < photos.length; i++) {
                     fileNames.push(photos[i].name);
                 }
                 alert("Uploaded Photos: " + fileNames.join(", ")); // Alert the names of the files
-            } 
+            } else {
+                alert("No photos uploaded.");
+            }
         });
     </script>
 
